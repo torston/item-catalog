@@ -1,0 +1,36 @@
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="row">
+    {% for category in categories %}
+      <div class="col-md-4 col-sm-6">
+        <div class="category-card" data-category="{{category.description}}">
+          <span class="category-card__item-title"> {{category.description}} </span>
+          <div class="category-card__item-count">
+              <p><b>{{ category.name }}</b></p>
+            {% for item in items %}
+            <p>{{ item.name }}</p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div id="latest-items" class="category-items">
+      <h2>Latest Items</h2>
+      <ul>
+      {% for item in latest_items %}
+        <li><a href="{{url_for('show_item_page', item_id=item.id ) }}">{{item.title}}</a> <small>({{item.category.description}}) </small></li>
+      {% endfor %}
+      </ul>
+    </div>
+
+    <div id="selected-category-items" class="category-items">
+    </div>
+  </div>
+</div>
+
+{% endblock %}

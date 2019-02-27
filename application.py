@@ -1,14 +1,61 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, flash
+from flask import Flask, render_template, url_for
+from flask import request, redirect, flash, make_response, jsonify
+from flask import session as login_session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from database_setup import Base, User, Category, CatalogItem, engine
 
 app = Flask(__name__)
 
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+
 APPLICATION_NAME = "Item Catalog Application"
 
-
+# show latest Items
 @app.route('/')
-@app.route('/hello')
-def hello_world():
-    return "Hello World"
+@app.route('/index')
+@app.route('/index.json', endpoint="index-json")
+def home():
+    items = session.query(CatalogItem).order_by(CatalogItem.id.desc()).all()
+
+    if request.path.endswith('.json'):
+        return jsonify(json_list=[i.serialize for i in items])
+
+    categories = session.query(Category).all()
+
+    return render_template('index.html',
+                           categories=categories,
+                           items=items,
+                           logged_in=True,
+                           section_title="Latest Items",
+                           )
+
+
+# show Items
+@app.route('/catalog/<string:category_name>')
+@app.route('/catalog/<string:category_name>.json',
+           endpoint="category-json")
+def categoryItems(category_name):
+    items = session.query(CatalogItem).filter_by(category_name=category_name).all()
+
+    if request.path.endswith('.json'):
+        return jsonify(json_list=[i.serialize for i in items])
+
+    categories = session.query(Category).all()
+
+    logged_in = True
+    return render_template('index.html',
+                           categories=categories,
+                           current_category=category_name,
+                           items=items,
+                           logged_in=logged_in,
+                           section_title="%s Items (%d items)" % (
+                               category_name, len(items)),
+                           )
 
 
 if __name__ == '__main__':
