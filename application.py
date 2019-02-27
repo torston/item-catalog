@@ -56,16 +56,14 @@ def category_items(category_name):
     if request.path.endswith('.json'):
         return jsonify(json_list=[i.serialize for i in items])
 
-    categories = session.query(Category).all()
-
     logged_in = True
     return render_template('index.html',
-                           categories=categories,
+                           categories=[category],
                            current_category=category_name,
                            items=items,
                            logged_in=logged_in,
                            section_title="%s Items (%d items)" % (
-                               category_name, len(items)),
+                               category.name, len(items)),
                            )
 
 
