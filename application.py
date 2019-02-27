@@ -4,6 +4,8 @@ from flask import session as login_session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from sqlalchemy import func
+
 from database_setup import Base, User, Category, CatalogItem, engine
 
 app = Flask(__name__)
@@ -14,6 +16,7 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 APPLICATION_NAME = "Item Catalog Application"
+
 
 # show latest Items
 @app.route('/')
@@ -37,10 +40,15 @@ def home():
 
 # show Items
 @app.route('/catalog/<string:category_name>')
-@app.route('/catalog/<string:category_name>.json',
-           endpoint="category-json")
-def categoryItems(category_name):
-    items = session.query(CatalogItem).filter_by(category_name=category_name).all()
+@app.route('/catalog/<string:category_name>.json', endpoint="category-json")
+def category_items(category_name):
+    print(category_name)
+    category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+
+    if category is None:
+        return jsonify('error, category not found')
+
+    items = session.query(CatalogItem).filter_by(category_id=category.id).all()
 
     if request.path.endswith('.json'):
         return jsonify(json_list=[i.serialize for i in items])

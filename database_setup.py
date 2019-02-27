@@ -3,7 +3,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import create_engine
 
-
 Base = declarative_base()
 
 
@@ -27,8 +26,8 @@ class Category(Base):
     @property
     def serialize(self):
         return {
-            'name': self.name,
             'id': self.id,
+            'name': self.name,
         }
 
 
@@ -38,7 +37,6 @@ class CatalogItem(Base):
     name = Column(String(80), nullable=False)
     id = Column(Integer, primary_key=True)
     description = Column(String(250))
-    price = Column(String(8))
 
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(
@@ -50,12 +48,13 @@ class CatalogItem(Base):
     @property
     def serialize(self):
         return {
+            'id': self.id,
             'name': self.name,
             'description': self.description,
-            'id': self.id,
-            'price': self.price
+            'category': self.category.name,
         }
 
 
+# used check_same_thread = False to avoid threading errors
 engine = create_engine('sqlite:///item_catalog.db', connect_args={'check_same_thread': False})
 Base.metadata.create_all(engine)
