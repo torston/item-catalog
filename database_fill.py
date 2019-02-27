@@ -8,10 +8,21 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+
+def get_or_create(session, model, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).first()
+    if instance:
+        return instance
+    else:
+        instance = model(**kwargs)
+        session.add(instance)
+        session.commit()
+        return instance
+
+
 user = User(name="torston",
             email="torston@nomail.com")
 session.add(user)
-
 
 default_desc = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the " \
                "industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type " \
@@ -30,9 +41,8 @@ items = [['Stick', 'Hockey'],
          ['Jersey', 'Soccer'],
          ['Soccer Cleats', 'Soccer']]
 
-
 for item in items:
-    category = Category(name=item[1])
+    category = get_or_create(session, Category, name=item[1])
     item = CatalogItem(name=item[0],
                        description=default_desc,
                        category=category,

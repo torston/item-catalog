@@ -4,11 +4,14 @@ from flask import session as login_session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from flask_bootstrap import Bootstrap
+
 from sqlalchemy import func
 
 from database_setup import Base, User, Category, CatalogItem, engine
 
 app = Flask(__name__)
+bootstrap = Bootstrap(app)
 
 Base.metadata.bind = engine
 
@@ -40,7 +43,7 @@ def home():
 
 # show Items
 @app.route('/catalog/<string:category_name>')
-@app.route('/catalog/<string:category_name>.json', endpoint="category-json")
+@app.route('/catalog/<string:category_name>.json', endpoint="item-json")
 def category_items(category_name):
     print(category_name)
     category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
@@ -63,6 +66,31 @@ def category_items(category_name):
                            logged_in=logged_in,
                            section_title="%s Items (%d items)" % (
                                category_name, len(items)),
+                           )
+
+
+# show Item details
+@app.route('/catalog/<string:category_name>/<string:item_name>')
+@app.route('/catalog/<string:category_name>/<string:item_name>.json', endpoint="category-json")
+def item_details(category_name, item_name):
+    category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+
+    if category is None:
+        return jsonify('error, category not found')
+
+    item = session.query(CatalogItem).filter(func.lower(CatalogItem.name) == func.lower(item_name)).first()
+
+    if category is None:
+        return jsonify('error, item not found')
+
+    if request.path.endswith('.json'):
+        return jsonify(item=item.serialize)
+
+    logged_in = True
+    return render_template('item_details.html',
+                           item_name=item.name,
+                           item_description=item.description,
+                           logged_in=logged_in,
                            )
 
 
