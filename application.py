@@ -30,7 +30,7 @@ session = DBSession()
 
 APPLICATION_NAME = "Item Catalog Application"
 CLIENT_ID = json.loads(
-    open('client_secret.json', 'r').read())['web']['client_id']
+    open('client_secrets.json', 'r').read())['web']['client_id']
 
 
 # show latest Items
