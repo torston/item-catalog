@@ -1,41 +1,54 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="col-md-8">
-    <div class="row" style="margin-top: 2em;">
-        {% for category in categories %}
-        <div class="col-md-2 col-sm-2 col-sm-offset-1 col-md-offset-1">
-            <div class="panel panel-default" style="width: 18rem;">
-                <div class="panel-heading">
-                    <h4><a href="{{url_for('category_items', category_name=category.name)}}">{{category.name}}</a></h4>
-                </div>
-                <div class="panel-body">
-                    {% for item in items %}
-                    {% if item.category_id == category.id %}
-                    <p>{{ item.name }}</p>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
+
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-success" role="alert">
+        {% for message in messages %}
+        {{ message }}
         {% endfor %}
     </div>
-</div>
-
-<div class="col-md-4">
-    <div id="latest-items" class="category-items">
-        <h2>{{ section_title }}</h2>
-        <ul>
-            {% for item in items %}
-            <li>
-                <a href="{{url_for('item_details', item_name=item.name, category_name=item.category.name)}}">{{item.name}}</a>
-                <small>({{item.category.name}})</small>
-            </li>
+    {% endif %}
+    {% endwith %}
+    <div class="col-md-8">
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-md-4">
+                <div class="panel panel-default" style="width: 18rem;">
+                    <div class="panel-heading">
+                        <h4><a href="{{url_for('category_items', category_name=category.name)}}">{{category.name}}</a>
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        {% for item in items %}
+                        {% if item.category_id == category.id %}
+                        <p>{{ item.name }}</p>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
             {% endfor %}
-        </ul>
+        </div>
     </div>
 
-    <div id="selected-category-items" class="category-items">
+    <div class="col-md-4">
+        <div id="latest-items" class="category-items">
+            <h2>{{ section_title }}</h2>
+            <ul>
+                {% for item in items %}
+                <li>
+                    <a href="{{url_for('item_details', item_name=item.name, category_name=item.category.name)}}">{{item.name}}</a>
+                    <small>({{item.category.name}})</small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div id="selected-category-items" class="category-items">
+        </div>
     </div>
 </div>
 {% endblock %}
