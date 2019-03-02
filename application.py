@@ -217,8 +217,10 @@ def gdisconnect():
         response = make_response(json.dumps('Successfully disconnected.'))
         response.headers['Content-Type'] = 'application/json'
 
-        return jsonify(result='ok')
+        return redirect(url_for('home'), code=301)
     else:
+        print('ERROR:')
+        print(result)
         del login_session['access_token']
         del login_session['gplus_id']
         del login_session['username']
@@ -228,7 +230,8 @@ def gdisconnect():
         response = make_response(json.dumps('Failed to revoke token for given user.'))
         response.headers['Content-Type'] = 'application/json'
 
-        return jsonify(result='ok')
+        return response
+
 
 
 if __name__ == '__main__':
