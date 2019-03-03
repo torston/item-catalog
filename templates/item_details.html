@@ -2,9 +2,15 @@
 
 {% block content %}
 <div class="container">
+    {% include "flash_messages.html" %}
     <div class="jumbotron">
-        <h1>{{item_name}}</h1>
-        <p>{{item_description}}</p>
+        <h1>{{item.name}}</h1>
+        <p>{{item.description}}</p>
+        <p><b>Category: {{item.category.name}}</b></p>
+        <row>
+            <button type="button" class="btn btn-default" onclick="window.location.href='{{ url_for( 'item_details_edit', category_name=item.category.name, item_name=item.name) }}';">Edit</button>
+            <button type="button" class="btn btn-default" onclick="window.location.href='{{ url_for( 'item_details_edit', category_name=item.category.name, item_name=item.name) }}';">Delete</button>
+        </row>
     </div>
 </div>
 {% endblock %}

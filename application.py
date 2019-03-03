@@ -106,11 +106,42 @@ def item_details(category_name, item_name):
         return jsonify(item=item.serialize)
 
     logged_in = True
+
+    categories = session.query(Category).all()
+
     return render_template('item_details.html',
-                           item_name=item.name,
-                           item_description=item.description,
+                           item=item,
+                           categories=categories,
                            logged_in=logged_in,
                            )
+
+@app.route('/catalog/<string:category_name>/<string:item_name>/edit')
+#@app.route('/catalog/<string:category_name>/<string:item_name>.json', endpoint="category-json")
+def item_details_edit(category_name, item_name):
+    category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+
+    if category is None:
+        return jsonify('error, category not found')
+
+    item = session.query(CatalogItem).filter(func.lower(CatalogItem.name) == func.lower(item_name)).first()
+
+    if category is None:
+        return jsonify('error, item not found')
+
+    if request.path.endswith('.json'):
+        return jsonify(item=item.serialize)
+
+    logged_in = True
+
+    categories = session.query(Category).all()
+
+    return render_template('item_details_edit.html',
+                           item=item,
+                           categories=categories,
+                           logged_in=logged_in,
+                           )
+
+
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -232,6 +263,29 @@ def gdisconnect():
 
         return response
 
+# @app.route('/restaurant/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
+# def deleteRestaurant(restaurant_id):
+#     restaurantToDelete = session.query(
+#         Restaurant).filter_by(id=restaurant_id).one()
+#     if request.method == 'POST':
+#         session.delete(restaurantToDelete)
+#         session.commit()
+#         return redirect(
+#             url_for('showRestaurants', restaurant_id=restaurant_id))
+#     else:
+#         return render_template(
+#             'deleteRestaurant.html', restaurant=restaurantToDelete)
+#     # return 'This page will be for deleting restaurant %s' % restaurant_id
+#
+#
+# # Show a restaurant menu
+# @app.route('/restaurant/<int:restaurant_id>/')
+# @app.route('/restaurant/<int:restaurant_id>/menu/')
+# def showMenu(restaurant_id):
+#     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+#     items = session.query(MenuItem).filter_by(
+#         restaurant_id=restaurant_id).all()
+#     return render_template('menu.html', items=items, restaurant=restaurant)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    {% include "flash_messages.html" %}
+    <div class="jumbotron">
+        <div class="form-group">
+            <label for="comment">Item Name:</label>
+            <input type="text" class="form-control" id="usr" value="{{item.name}}"></input>
+            <label for="comment">Description:</label>
+            <textarea class="form-control" rows="5" id="comment">{{item.description}}</textarea>
+            <label for="sel1">Category:</label>
+            <select class="form-control" id="sel1">
+                {% for category in categories %}
+                    {% if category.id == item.category.id %}
+                    <option selected>{{category.name}}</option>
+                    {% else %}
+                    <option>{{category.name}}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <row>
+            <button type="button" class="btn btn-default" onclick="window.location.href='{{ url_for( 'item_details', category_name=item.category.name, item_name=item.name) }}';">Save</button>
+            <button type="button" class="btn btn-default" onclick="window.location.href='{{ url_for( 'item_details', category_name=item.category.name, item_name=item.name) }}';">Cancel</button>
+
+        </row>
+    </div>
+</div>
+{% endblock %}
