@@ -7,15 +7,21 @@
         <div class="row">
             {% for category in categories %}
             <div class="col-md-4">
-                <div class="panel panel-default" style="width: 18rem;">
+                <div class="panel panel-default" style="width: 20rem;">
                     <div class="panel-heading">
-                        <h4><a href="{{url_for('category_items', category_name=category.name)}}">{{category.name}}</a>
-                        </h4>
+                        <row>
+                            <h4>
+                                <a href="{{url_for('category_items', category_name=category.name)}}">{{category.name}}</a>
+                                <a class="glyphicon glyphicon-plus" href="{{url_for('item_details_add_category', category_name=category.name)}}"></a>
+                            </h4>
+
+                        </row>
                     </div>
                     <div class="panel-body">
                         {% for item in items %}
                         {% if item.category_id == category.id %}
-                        <p>{{ item.name }}</p>
+                        <p><a href="{{url_for('item_details', item_name=item.name, category_name=item.category.name)}}">{{item.name}}</a>
+                        </p>
                         {% endif %}
                         {% endfor %}
                     </div>
@@ -26,7 +32,10 @@
     </div>
 
     <div class="col-md-4">
-        <div id="latest-items" class="category-items">
+        {% if username is not none %}
+        <a href="{{url_for('item_details_add')}}">Add new item</a>
+        {% endif %}
+        <div id=" latest-items" class="category-items">
             <h2>{{ section_title }}</h2>
             <ul>
                 {% for item in items %}

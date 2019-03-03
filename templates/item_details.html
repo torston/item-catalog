@@ -7,10 +7,39 @@
         <h1>{{item.name}}</h1>
         <p>{{item.description}}</p>
         <p><b>Category: {{item.category.name}}</b></p>
+        {% if username is not none %}
         <row>
-            <button type="button" class="btn btn-default" onclick="window.location.href='{{ url_for( 'item_details_edit', category_name=item.category.name, item_name=item.name) }}';">Edit</button>
-            <button type="button" class="btn btn-default" onclick="window.location.href='{{ url_for( 'item_details_edit', category_name=item.category.name, item_name=item.name) }}';">Delete</button>
+            <button type="button" class="btn btn-default"
+                    onclick="window.location.href='{{ url_for( 'item_details_edit', category_name=item.category.name, item_name=item.name) }}';">
+                Edit
+            </button>
+            <button type="button" class="btn btn-danger"
+
+                    data-toggle="modal" data-target="#myModal">
+                Delete
+            </button>
         </row>
+        {% endif %}
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">DELETE {{ item.name}}</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal"
+                            onclick="window.location.href='{{ url_for( 'item_details_delete', category_name=item.category.name, item_name=item.name) }}';">
+                        Yes, delete it!
+                    </button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

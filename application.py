@@ -55,7 +55,6 @@ def home():
     return render_template('index.html',
                            categories=categories,
                            items=items,
-                           logged_in=logged_in,
                            username=login_session.get("username", None),
                            section_title="Latest Items",
                            STATE=state,
@@ -77,12 +76,10 @@ def category_items(category_name):
     if request.path.endswith('.json'):
         return jsonify(json_list=[i.serialize for i in items])
 
-    logged_in = True
     return render_template('index.html',
                            categories=[category],
                            current_category=category_name,
                            items=items,
-                           logged_in=logged_in,
                            section_title="%s Items (%d items)" % (
                                category.name, len(items)),
                            )
@@ -105,18 +102,16 @@ def item_details(category_name, item_name):
     if request.path.endswith('.json'):
         return jsonify(item=item.serialize)
 
-    logged_in = True
-
     categories = session.query(Category).all()
 
     return render_template('item_details.html',
                            item=item,
                            categories=categories,
-                           logged_in=logged_in,
+                           username=login_session.get("username", None),
                            )
 
-@app.route('/catalog/<string:category_name>/<string:item_name>/edit')
-#@app.route('/catalog/<string:category_name>/<string:item_name>.json', endpoint="category-json")
+
+@app.route('/catalog/<string:category_name>/<string:item_name>/edit', methods=['GET', 'POST'])
 def item_details_edit(category_name, item_name):
     category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
 
@@ -131,17 +126,110 @@ def item_details_edit(category_name, item_name):
     if request.path.endswith('.json'):
         return jsonify(item=item.serialize)
 
-    logged_in = True
-
     categories = session.query(Category).all()
+
+    if request.method == 'POST':
+        print(request.form)
+        item.name = request.form['name']
+        item.description = request.form['description']
+        item.category = session.query(Category).filter(
+            func.lower(Category.name) == func.lower(request.form['category_name'])).first()
+
+        session.add(item)
+
+        session.commit()
+
+        flash('You were edited item!')
+
+        return redirect(url_for('item_details',
+                                category_name=item.category.name,
+                                item_name=item.name))
 
     return render_template('item_details_edit.html',
                            item=item,
                            categories=categories,
-                           logged_in=logged_in,
+                           username=login_session.get("username", None),
                            )
 
 
+@app.route('/catalog/<string:category_name>/<string:item_name>/delete')
+def item_details_delete(category_name, item_name):
+    category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+
+    if category is None:
+        return jsonify('error, category not found')
+
+    item = session.query(CatalogItem).filter(func.lower(CatalogItem.name) == func.lower(item_name)).first()
+
+    if category is None:
+        return jsonify('error, item not found')
+
+    session.delete(item)
+    session.commit()
+
+    return redirect(url_for('home'), code=301)
+
+
+@app.route('/catalog/<string:category_name>/add', methods=['GET', 'POST'])
+def item_details_add_category(category_name):
+    if request.method == 'POST':
+        item = CatalogItem()
+        item.name = request.form['name']
+        item.description = request.form['description']
+        item.category = session.query(Category).filter(
+            func.lower(Category.name) == func.lower(request.form['category_name'])).first()
+
+        session.add(item)
+
+        session.commit()
+
+        return redirect(url_for('home'), code=301)
+
+    else:
+        category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+
+        item = CatalogItem()
+
+        item.name = ''
+        item.description = ''
+        item.category = category
+        categories = session.query(Category).all()
+
+        return render_template('item_details_add.html',
+                               item=item,
+                               categories=categories,
+                               category_name=category_name,
+                               username=login_session.get("username", None),
+                               )
+
+
+@app.route('/catalog/add', methods=['GET', 'POST'])
+def item_details_add():
+    if request.method == 'POST':
+        item = CatalogItem()
+        item.name = request.form['name']
+        item.description = request.form['description']
+        item.category = session.query(Category).filter(
+            func.lower(Category.name) == func.lower(request.form['category_name'])).first()
+
+        session.add(item)
+
+        session.commit()
+
+        return redirect(url_for('home'), code=301)
+
+    else:
+        categories = session.query(Category).all()
+        item = CatalogItem()
+
+        item.name = ''
+        item.description = ''
+
+        return render_template('item_details_add.html',
+                               item=item,
+                               categories=categories,
+                               username=login_session.get("username", None),
+                               )
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -262,6 +350,7 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
 
         return response
+
 
 # @app.route('/restaurant/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
 # def deleteRestaurant(restaurant_id):
