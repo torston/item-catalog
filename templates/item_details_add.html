@@ -5,23 +5,7 @@
     {% include "flash_messages.html" %}
     <div class="jumbotron">
         <form action="#" method="post">
-            <div class="form-group">
-                <label for="name">Item Name:</label>
-                <input type="text" class="form-control" name="name" id="name" value="{{item.name}}" required="required"
-                       pattern="[A-Za-z0-9]{1,20}"></input>
-                <label for="description">Description:</label>
-                <textarea class="form-control" rows="5" name="description" id="description" required="required" pattern="[A-Za-z0-9_ ]{1,120}">{{item.description}}</textarea>
-                <label for="category_name">Category:</label>
-                <select class="form-control" id="category_name" name="category_name">
-                    {% for category in categories %}
-                    {% if category.id == item.category.id %}
-                    <option selected>{{category.name}}</option>
-                    {% else %}
-                    <option>{{category.name}}</option>
-                    {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
+            {% include "item_edit.html" %}
             {% if username is not none %}
             <row>
                 <button type="submit" class="btn btn-success">

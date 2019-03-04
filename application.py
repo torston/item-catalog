@@ -1,24 +1,20 @@
-from flask import Flask, render_template, url_for, flash
-from flask import request, redirect, flash, make_response, jsonify
+import hashlib
+import json
+import os
+
+import httplib2
+import requests
+from flask import Flask, render_template, url_for
+from flask import make_response
+from flask import request, redirect, flash, jsonify
 from flask import session as login_session
-from sqlalchemy import create_engine
+from flask_bootstrap import Bootstrap
+from oauth2client.client import FlowExchangeError
+from oauth2client.client import flow_from_clientsecrets
+from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 
-from flask_bootstrap import Bootstrap
-
-from sqlalchemy import func
-
-from database_setup import Base, User, Category, CatalogItem, engine
-
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import FlowExchangeError
-import httplib2
-import json
-from flask import make_response
-import requests
-
-import hashlib
-import os
+from database_setup import Base, Category, CatalogItem, engine
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -33,7 +29,6 @@ CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 
 
-# show latest Items
 @app.route('/')
 @app.route('/index')
 @app.route('/index.json', endpoint="index-json")
@@ -57,7 +52,6 @@ def home():
                            )
 
 
-# show Items
 @app.route('/catalog/<string:category_name>')
 @app.route('/catalog/<string:category_name>.json', endpoint="item-json")
 def category_items(category_name):
@@ -82,7 +76,6 @@ def category_items(category_name):
                            )
 
 
-# show Item details
 @app.route('/catalog/<string:category_name>/<string:item_name>')
 @app.route('/catalog/<string:category_name>/<string:item_name>.json', endpoint="category-json")
 def item_details(category_name, item_name):
@@ -244,13 +237,14 @@ def item_details_add():
 
 
 @app.route('/login')
-def showLogin():
+def show_login():
     state = hashlib.sha256(os.urandom(1024)).hexdigest()
     login_session['state'] = state
 
     return render_template('login.html',
-                               STATE=state,
-                           username = None)
+                           STATE=state,
+                           username=None)
+
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -318,9 +312,9 @@ def gconnect():
     login_session['gplus_id'] = google_id
 
     # Get user info
-    userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
+    user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
     params = {'access_token': credentials.access_token, 'alt': 'json'}
-    answer = requests.get(userinfo_url, params=params)
+    answer = requests.get(user_info_url, params=params)
 
     data = answer.json()
 
@@ -328,7 +322,7 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
-    return jsonify(result='ok')
+    return redirect(url_for('home'), code=301)
 
 
 @app.route('/gdisconnect')
@@ -353,8 +347,6 @@ def gdisconnect():
         del login_session['username']
         del login_session['email']
         del login_session['picture']
-        response = make_response(json.dumps('Successfully disconnected.'))
-        response.headers['Content-Type'] = 'application/json'
 
         return redirect(url_for('home'), code=301)
     else:
@@ -370,31 +362,6 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
 
         return response
-
-
-# @app.route('/restaurant/<int:restaurant_id>/delete/', methods=['GET', 'POST'])
-# def deleteRestaurant(restaurant_id):
-#     restaurantToDelete = session.query(
-#         Restaurant).filter_by(id=restaurant_id).one()
-#     if request.method == 'POST':
-#         session.delete(restaurantToDelete)
-#         session.commit()
-#         return redirect(
-#             url_for('showRestaurants', restaurant_id=restaurant_id))
-#     else:
-#         return render_template(
-#             'deleteRestaurant.html', restaurant=restaurantToDelete)
-#     # return 'This page will be for deleting restaurant %s' % restaurant_id
-#
-#
-# # Show a restaurant menu
-# @app.route('/restaurant/<int:restaurant_id>/')
-# @app.route('/restaurant/<int:restaurant_id>/menu/')
-# def showMenu(restaurant_id):
-#     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-#     items = session.query(MenuItem).filter_by(
-#         restaurant_id=restaurant_id).all()
-#     return render_template('menu.html', items=items, restaurant=restaurant)
 
 
 if __name__ == '__main__':
