@@ -110,6 +110,9 @@ def item_details(category_name, item_name):
 
 @app.route('/catalog/<string:category_name>/<string:item_name>/edit', methods=['GET', 'POST'])
 def item_details_edit(category_name, item_name):
+    if 'username' not in login_session:
+        return redirect('/login')
+
     category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
 
     if category is None:
@@ -151,6 +154,9 @@ def item_details_edit(category_name, item_name):
 
 @app.route('/catalog/<string:category_name>/<string:item_name>/delete')
 def item_details_delete(category_name, item_name):
+    if 'username' not in login_session:
+        return redirect('/login')
+
     category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
 
     if category is None:
@@ -171,6 +177,9 @@ def item_details_delete(category_name, item_name):
 
 @app.route('/catalog/<string:category_name>/add', methods=['GET', 'POST'])
 def item_details_add_category(category_name):
+    if 'username' not in login_session:
+        return redirect('/login')
+
     if request.method == 'POST':
         item = CatalogItem()
         item.name = request.form['name']
@@ -204,6 +213,9 @@ def item_details_add_category(category_name):
 
 @app.route('/catalog/add', methods=['GET', 'POST'])
 def item_details_add():
+    if 'username' not in login_session:
+        return redirect('/login')
+
     if request.method == 'POST':
         item = CatalogItem()
         item.name = request.form['name']
