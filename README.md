@@ -31,7 +31,11 @@ Seperate instructions are provided to get GConnect working also.
 3. Launch the Vagrant VM (`vagrant up`)
 4. Log into Vagrant VM (`vagrant ssh`)
 5. Navigate to `cd/vagrant` as instructed in terminal
+6. `curl https://bootstrap.pypa.io/get-pip.py | sudo -H python3.6
 
+sudo add-apt-repository ppa:jonathonf/python-3.6
+sudo apt update
+sudo apt install python3.6`
 6. `sudo pip3 install requests`
 7. `sudo pip3 install flask`
 8. `sudo pip3 install sqalchemy`
