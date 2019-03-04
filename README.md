@@ -31,23 +31,16 @@ Seperate instructions are provided to get GConnect working also.
 3. Launch the Vagrant VM (`vagrant up`)
 4. Log into Vagrant VM (`vagrant ssh`)
 5. Navigate to `cd/vagrant` as instructed in terminal
-6. `curl https://bootstrap.pypa.io/get-pip.py | sudo -H python3.6
-
-sudo add-apt-repository ppa:jonathonf/python-3.6
-sudo apt update
-sudo apt install python3.6`
-6. `sudo pip3 install requests`
+6. Intall python 3.6 on VM ([instruction](http://ubuntuhandbook.org/index.php/2017/07/install-python-3-6-1-in-ubuntu-16-04-lts/))
 7. `sudo pip3 install flask`
-8. `sudo pip3 install sqalchemy`
+8. `sudo pip3 install sqlalchemy`
 9. `sudo  pip3 install flask-bootstrap`
 9. `sudo  pip3 install httplib2`
 9. `sudo  pip3 install oauth2client`
-10. Setup application database `python3 /item-catalog/database_setup.py`
-11. Insert sample data `python3 /item-catalog/database_fill.py`
-12. Run application using `python3 /item-catalog/application.py`
+10. Setup application database `python3 /catalog/database_setup.py`
+11. Insert sample data `python3 /catalog/database_fill.py`
+12. Run application using `python3 /catalog/application.py`
 13. Access the application locally using http://localhost:8000
-
-*Optional step(s)
 
 ## Using Google Login
 To get the Google login working there are a few additional steps:
@@ -65,7 +58,7 @@ To get the Google login working there are a few additional steps:
 11. On the Dev Console Select Download JSON
 12. Rename JSON file to client_secrets.json
 13. Place JSON file in item-catalog directory that you cloned from here
-14. Run application using `python3 /item-catalog/application.py`
+14. Run application using `python3 /catalog/application.py`
 
 ## JSON Endpoints
 The following are open to the public:
