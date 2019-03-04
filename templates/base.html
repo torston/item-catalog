@@ -15,55 +15,14 @@
         <ul class="nav navbar-nav navbar-right">
             {%if username is not none %}
             <li><a><span class="glyphicon glyphicon-user"></span> You are logger as {{username}}</a></li>
-            <li><a href="{{ url_for( 'gdisconnect' ) }}"><span class="glyphicon glyphicon-log-in"></span> Log out</a>
-            </li>
-            </button></li>
+            <li><a href="{{ url_for( 'gdisconnect' ) }}"><span class="glyphicon glyphicon-log-in"></span> Log out</a></li>
 
             {% else %}
-            <li id="signinButton">
-                <span class="g-signin"
-                      data-scope="openid email"
-                      data-clientid="13262236689-m1v3pt752apruj7a8178v2f7f5rbsl3g.apps.googleusercontent.com"
-                      data-redirecturi="postmessage"
-                      data-accesstype="offline"
-                      data-cookiepolicy="single_host_origin"
-                      data-callback="signInCallback"
-                      data-approvalprompt="force">
-                </span>
-            </li>
+                <li><a href="{{ url_for( 'showLogin' ) }}"><span class="glyphicon glyphicon-user"></span>Login</a></li>
+
 
             {% endif %}
         </ul>
     </div>
 </div>
-
-<script>
-    function signInCallback(authResult) {
-        console.log(authResult);
-        console.log(authResult['code']);
-        if (authResult['code']) {
-            // Hide the sign-in button now that the user is authorized
-            $('#signinButton').attr('style', 'display: none');
-            $.ajax({
-                type: 'POST',
-                url: '/gconnect?state={{STATE}}',
-                processData: false,
-                data: authResult['code'],
-                contentType: 'application/octet-stream; charset=utf-8',
-                success: function (result) {
-                    if (result) {
-                        window.location.href = "/index";
-                    } else if (authResult['error']) {
-                        console.log('There was an error: ' + authResult['error']);
-                    } else {
-                        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
-                    }
-                }
-
-            });
-        }
-    }
-</script>
-
-
 {% endblock %}

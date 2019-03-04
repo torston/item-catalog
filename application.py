@@ -38,9 +38,6 @@ CLIENT_ID = json.loads(
 @app.route('/index')
 @app.route('/index.json', endpoint="index-json")
 def home():
-    state = hashlib.sha256(os.urandom(1024)).hexdigest()
-    login_session['state'] = state
-
     items = session.query(CatalogItem).order_by(CatalogItem.id.desc()).all()
 
     if request.path.endswith('.json'):
@@ -56,8 +53,7 @@ def home():
                            categories=categories,
                            items=items,
                            username=login_session.get("username", None),
-                           section_title="Latest Items",
-                           STATE=state,
+                           section_title="Latest Items"
                            )
 
 
@@ -80,6 +76,7 @@ def category_items(category_name):
                            categories=[category],
                            current_category=category_name,
                            items=items,
+                           username=login_session.get("username", None),
                            section_title="%s Items (%d items)" % (
                                category.name, len(items)),
                            )
@@ -139,7 +136,7 @@ def item_details_edit(category_name, item_name):
 
         session.commit()
 
-        flash('You were edited item!')
+        flash('You successfully edited item!')
 
         return redirect(url_for('item_details',
                                 category_name=item.category.name,
@@ -166,6 +163,8 @@ def item_details_delete(category_name, item_name):
 
     session.delete(item)
     session.commit()
+
+    flash('You successfully deleted item!')
 
     return redirect(url_for('home'), code=301)
 
@@ -231,6 +230,15 @@ def item_details_add():
                                username=login_session.get("username", None),
                                )
 
+
+@app.route('/login')
+def showLogin():
+    state = hashlib.sha256(os.urandom(1024)).hexdigest()
+    login_session['state'] = state
+
+    return render_template('login.html',
+                               STATE=state,
+                           username = None)
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():

@@ -12,7 +12,9 @@
                         <row>
                             <h4>
                                 <a href="{{url_for('category_items', category_name=category.name)}}">{{category.name}}</a>
+                                {% if username is not none %}
                                 <a class="glyphicon glyphicon-plus" href="{{url_for('item_details_add_category', category_name=category.name)}}"></a>
+                                {% endif %}
                             </h4>
 
                         </row>
