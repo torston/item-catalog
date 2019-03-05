@@ -13,6 +13,7 @@ from oauth2client.client import FlowExchangeError
 from oauth2client.client import flow_from_clientsecrets
 from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
+from functools import wraps
 
 from database_setup import Base, Category, CatalogItem, engine
 
@@ -27,6 +28,18 @@ session = DBSession()
 APPLICATION_NAME = "Item Catalog Application"
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web'][
     'client_id']
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' in login_session:
+            return f(*args, **kwargs)
+        else:
+            flash('You are not allowed to access there')
+            return redirect('/login')
+
+    return decorated_function
 
 
 @app.route('/')
@@ -97,12 +110,10 @@ def item_details(category_name, item_name):
                            username=login_session.get("username", None), )
 
 
+@login_required
 @app.route('/catalog/<string:category_name>/<string:item_name>/edit',
            methods=['GET', 'POST'])
 def item_details_edit(category_name, item_name):
-    if 'username' not in login_session:
-        return redirect('/login')
-
     category = session.query(Category).filter(
         func.lower(Category.name) == func.lower(category_name)).first()
 
@@ -143,11 +154,9 @@ def item_details_edit(category_name, item_name):
                            username=login_session.get("username", None), )
 
 
+@login_required
 @app.route('/catalog/<string:category_name>/<string:item_name>/delete')
 def item_details_delete(category_name, item_name):
-    if 'username' not in login_session:
-        return redirect('/login')
-
     category = session.query(Category).filter(
         func.lower(Category.name) == func.lower(category_name)).first()
 
@@ -168,11 +177,9 @@ def item_details_delete(category_name, item_name):
     return redirect(url_for('home'), code=301)
 
 
+@login_required
 @app.route('/catalog/<string:category_name>/add', methods=['GET', 'POST'])
 def item_details_add_category(category_name):
-    if 'username' not in login_session:
-        return redirect('/login')
-
     if request.method == 'POST':
         item = CatalogItem()
         item.name = request.form['name']
@@ -204,11 +211,9 @@ def item_details_add_category(category_name):
                                username=login_session.get("username", None), )
 
 
+@login_required
 @app.route('/catalog/add', methods=['GET', 'POST'])
 def item_details_add():
-    if 'username' not in login_session:
-        return redirect('/login')
-
     if request.method == 'POST':
         item = CatalogItem()
         item.name = request.form['name']
@@ -322,6 +327,7 @@ def gconnect():
     return redirect(url_for('home'), code=301)
 
 
+@login_required
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session.get('access_token')
