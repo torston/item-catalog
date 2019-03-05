@@ -31,6 +31,10 @@ CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web'][
 
 
 def login_required(f):
+    """
+    login_required: decorator for endpoints with login access
+    :return f any endpoint function:
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' in login_session:
@@ -46,6 +50,10 @@ def login_required(f):
 @app.route('/index')
 @app.route('/index.json', endpoint="index-json")
 def home():
+    """
+    home: main page endpoint
+    :return: render index page
+    """
     items = session.query(CatalogItem).order_by(CatalogItem.id.desc()).all()
 
     if request.path.endswith('.json'):
@@ -65,6 +73,11 @@ def home():
 @app.route('/catalog/<string:category_name>')
 @app.route('/catalog/<string:category_name>.json', endpoint="item-json")
 def category_items(category_name):
+    """
+    category_items: representation of items in category
+    :param category_name:
+    :return:  html page or json
+    """
     print(category_name)
     category = session.query(Category).filter(
         func.lower(Category.name) == func.lower(category_name)).first()
@@ -88,6 +101,12 @@ def category_items(category_name):
 @app.route('/catalog/<string:category_name>/<string:item_name>.json',
            endpoint="category-json")
 def item_details(category_name, item_name):
+    """
+    item_details: representation of item details
+    :param category_name:
+    :param item_name:
+    :return:  html page or json
+    """
     category = session.query(Category).filter(
         func.lower(Category.name) == func.lower(category_name)).first()
 
@@ -114,6 +133,12 @@ def item_details(category_name, item_name):
 @app.route('/catalog/<string:category_name>/<string:item_name>/edit',
            methods=['GET', 'POST'])
 def item_details_edit(category_name, item_name):
+    """
+    item_details_edit: representation of item edit page
+    :param category_name:
+    :param item_name:
+    :return: html page or redirect in case of POST
+    """
     category = session.query(Category).filter(
         func.lower(Category.name) == func.lower(category_name)).first()
 
@@ -160,6 +185,12 @@ def item_details_edit(category_name, item_name):
 @login_required
 @app.route('/catalog/<string:category_name>/<string:item_name>/delete')
 def item_details_delete(category_name, item_name):
+    """
+    item_details_delete: delete item
+    :param category_name:
+    :param item_name:
+    :return: redirect to home page
+    """
     category = session.query(Category).filter(
         func.lower(Category.name) == func.lower(category_name)).first()
 
@@ -187,6 +218,11 @@ def item_details_delete(category_name, item_name):
 @login_required
 @app.route('/catalog/<string:category_name>/add', methods=['GET', 'POST'])
 def item_details_add_category(category_name):
+    """
+    item_details_add_category: add item to selected category
+    :param category_name:
+    :return: html page or redirect in case of POST (item creation)
+    """
     if request.method == 'POST':
         item = CatalogItem()
         item.name = request.form['name']
@@ -224,6 +260,10 @@ def item_details_add_category(category_name):
 @login_required
 @app.route('/catalog/add', methods=['GET', 'POST'])
 def item_details_add():
+    """
+    item_details_add: add item to selected category
+    :return: html create item or redirect in case of POST (item creation)
+    """
     if request.method == 'POST':
         item = CatalogItem()
         item.name = request.form['name']
@@ -255,6 +295,10 @@ def item_details_add():
 
 @app.route('/login')
 def show_login():
+    """
+    show_login:  show login page
+    :return: html login page
+    """
     state = hashlib.sha256(os.urandom(1024)).hexdigest()
     login_session['state'] = state
 
@@ -263,6 +307,10 @@ def show_login():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """
+    gconnect: google auth
+    :return: redirect to home page
+    """
     print('callback!')
     flash('You were successfully logged in')
     # Validate state token
@@ -337,6 +385,7 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    # Get user from DB or create if new
     user = session.query(CatalogUser).filter_by(
         email=login_session['email']).first()
 
@@ -353,6 +402,10 @@ def gconnect():
 @login_required
 @app.route('/gdisconnect')
 def gdisconnect():
+    """
+    gdisconnect: log out
+    :return: redirect to home page
+    """
     access_token = login_session.get('access_token')
     if access_token is None:
         print('Access Token is None')
@@ -375,6 +428,7 @@ def gdisconnect():
         del login_session['username']
         del login_session['email']
         del login_session['picture']
+        del login_session['user_id']
 
         return redirect(url_for('home'), code=301)
     else:
@@ -385,6 +439,7 @@ def gdisconnect():
         del login_session['username']
         del login_session['email']
         del login_session['picture']
+        del login_session['user_id']
 
         response = make_response(
             json.dumps('Failed to revoke token for given user.'))
