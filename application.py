@@ -35,6 +35,7 @@ def login_required(f):
     login_required: decorator for endpoints with login access
     :return f any endpoint function:
     """
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' in login_session:
@@ -129,9 +130,9 @@ def item_details(category_name, item_name):
                            username=login_session.get("username", None), )
 
 
-@login_required
 @app.route('/catalog/<string:category_name>/<string:item_name>/edit',
            methods=['GET', 'POST'])
+@login_required
 def item_details_edit(category_name, item_name):
     """
     item_details_edit: representation of item edit page
@@ -182,8 +183,8 @@ def item_details_edit(category_name, item_name):
                            username=login_session.get("username", None), )
 
 
-@login_required
 @app.route('/catalog/<string:category_name>/<string:item_name>/delete')
+@login_required
 def item_details_delete(category_name, item_name):
     """
     item_details_delete: delete item
@@ -215,8 +216,8 @@ def item_details_delete(category_name, item_name):
     return redirect(url_for('home'), code=301)
 
 
-@login_required
 @app.route('/catalog/<string:category_name>/add', methods=['GET', 'POST'])
+@login_required
 def item_details_add_category(category_name):
     """
     item_details_add_category: add item to selected category
@@ -257,8 +258,8 @@ def item_details_add_category(category_name):
                                username=login_session.get("username", None), )
 
 
-@login_required
 @app.route('/catalog/add', methods=['GET', 'POST'])
+@login_required
 def item_details_add():
     """
     item_details_add: add item to selected category
@@ -399,8 +400,8 @@ def gconnect():
     return redirect(url_for('home'), code=301)
 
 
-@login_required
 @app.route('/gdisconnect')
+@login_required
 def gdisconnect():
     """
     gdisconnect: log out
