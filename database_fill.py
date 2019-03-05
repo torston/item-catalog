@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Category, User, CatalogItem
+from database_setup import Base, Category, CatalogUser, CatalogItem
 
 engine = create_engine('sqlite:///item_catalog.db')
 
@@ -20,7 +20,7 @@ def get_or_create(db_session, model, **kwargs):
         return instance
 
 
-user = User(name="torston",
+user = CatalogUser(name="torston",
             email="torston@nomail.com")
 session.add(user)
 
