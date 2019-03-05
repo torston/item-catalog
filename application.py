@@ -25,8 +25,8 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 APPLICATION_NAME = "Item Catalog Application"
-CLIENT_ID = json.loads(
-    open('client_secrets.json', 'r').read())['web']['client_id']
+CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web'][
+    'client_id']
 
 
 @app.route('/')
@@ -44,19 +44,17 @@ def home():
 
     categories = session.query(Category).all()
 
-    return render_template('index.html',
-                           categories=categories,
-                           items=items,
+    return render_template('index.html', categories=categories, items=items,
                            username=login_session.get("username", None),
-                           section_title="Latest Items"
-                           )
+                           section_title="Latest Items")
 
 
 @app.route('/catalog/<string:category_name>')
 @app.route('/catalog/<string:category_name>.json', endpoint="item-json")
 def category_items(category_name):
     print(category_name)
-    category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+    category = session.query(Category).filter(
+        func.lower(Category.name) == func.lower(category_name)).first()
 
     if category is None:
         return jsonify('error, category not found')
@@ -66,25 +64,25 @@ def category_items(category_name):
     if request.path.endswith('.json'):
         return jsonify(json_list=[i.serialize for i in items])
 
-    return render_template('index.html',
-                           categories=[category],
-                           current_category=category_name,
-                           items=items,
+    return render_template('index.html', categories=[category],
+                           current_category=category_name, items=items,
                            username=login_session.get("username", None),
                            section_title="%s Items (%d items)" % (
-                               category.name, len(items)),
-                           )
+                               category.name, len(items)), )
 
 
 @app.route('/catalog/<string:category_name>/<string:item_name>')
-@app.route('/catalog/<string:category_name>/<string:item_name>.json', endpoint="category-json")
+@app.route('/catalog/<string:category_name>/<string:item_name>.json',
+           endpoint="category-json")
 def item_details(category_name, item_name):
-    category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+    category = session.query(Category).filter(
+        func.lower(Category.name) == func.lower(category_name)).first()
 
     if category is None:
         return jsonify('error, category not found')
 
-    item = session.query(CatalogItem).filter(func.lower(CatalogItem.name) == func.lower(item_name)).first()
+    item = session.query(CatalogItem).filter(
+        func.lower(CatalogItem.name) == func.lower(item_name)).first()
 
     if category is None:
         return jsonify('error, item not found')
@@ -94,24 +92,25 @@ def item_details(category_name, item_name):
 
     categories = session.query(Category).all()
 
-    return render_template('item_details.html',
-                           item=item,
+    return render_template('item_details.html', item=item,
                            categories=categories,
-                           username=login_session.get("username", None),
-                           )
+                           username=login_session.get("username", None), )
 
 
-@app.route('/catalog/<string:category_name>/<string:item_name>/edit', methods=['GET', 'POST'])
+@app.route('/catalog/<string:category_name>/<string:item_name>/edit',
+           methods=['GET', 'POST'])
 def item_details_edit(category_name, item_name):
     if 'username' not in login_session:
         return redirect('/login')
 
-    category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+    category = session.query(Category).filter(
+        func.lower(Category.name) == func.lower(category_name)).first()
 
     if category is None:
         return jsonify('error, category not found')
 
-    item = session.query(CatalogItem).filter(func.lower(CatalogItem.name) == func.lower(item_name)).first()
+    item = session.query(CatalogItem).filter(
+        func.lower(CatalogItem.name) == func.lower(item_name)).first()
 
     if category is None:
         return jsonify('error, item not found')
@@ -126,7 +125,8 @@ def item_details_edit(category_name, item_name):
         item.name = request.form['name']
         item.description = request.form['description']
         item.category = session.query(Category).filter(
-            func.lower(Category.name) == func.lower(request.form['category_name'])).first()
+            func.lower(Category.name) == func.lower(
+                request.form['category_name'])).first()
 
         session.add(item)
 
@@ -134,15 +134,13 @@ def item_details_edit(category_name, item_name):
 
         flash('You successfully edited item!')
 
-        return redirect(url_for('item_details',
-                                category_name=item.category.name,
-                                item_name=item.name))
+        return redirect(
+            url_for('item_details', category_name=item.category.name,
+                    item_name=item.name))
 
-    return render_template('item_details_edit.html',
-                           item=item,
+    return render_template('item_details_edit.html', item=item,
                            categories=categories,
-                           username=login_session.get("username", None),
-                           )
+                           username=login_session.get("username", None), )
 
 
 @app.route('/catalog/<string:category_name>/<string:item_name>/delete')
@@ -150,12 +148,14 @@ def item_details_delete(category_name, item_name):
     if 'username' not in login_session:
         return redirect('/login')
 
-    category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+    category = session.query(Category).filter(
+        func.lower(Category.name) == func.lower(category_name)).first()
 
     if category is None:
         return jsonify('error, category not found')
 
-    item = session.query(CatalogItem).filter(func.lower(CatalogItem.name) == func.lower(item_name)).first()
+    item = session.query(CatalogItem).filter(
+        func.lower(CatalogItem.name) == func.lower(item_name)).first()
 
     if category is None:
         return jsonify('error, item not found')
@@ -178,7 +178,8 @@ def item_details_add_category(category_name):
         item.name = request.form['name']
         item.description = request.form['description']
         item.category = session.query(Category).filter(
-            func.lower(Category.name) == func.lower(request.form['category_name'])).first()
+            func.lower(Category.name) == func.lower(
+                request.form['category_name'])).first()
 
         session.add(item)
 
@@ -187,7 +188,8 @@ def item_details_add_category(category_name):
         return redirect(url_for('home'), code=301)
 
     else:
-        category = session.query(Category).filter(func.lower(Category.name) == func.lower(category_name)).first()
+        category = session.query(Category).filter(
+            func.lower(Category.name) == func.lower(category_name)).first()
 
         item = CatalogItem()
 
@@ -196,12 +198,10 @@ def item_details_add_category(category_name):
         item.category = category
         categories = session.query(Category).all()
 
-        return render_template('item_details_add.html',
-                               item=item,
+        return render_template('item_details_add.html', item=item,
                                categories=categories,
                                category_name=category_name,
-                               username=login_session.get("username", None),
-                               )
+                               username=login_session.get("username", None), )
 
 
 @app.route('/catalog/add', methods=['GET', 'POST'])
@@ -214,7 +214,8 @@ def item_details_add():
         item.name = request.form['name']
         item.description = request.form['description']
         item.category = session.query(Category).filter(
-            func.lower(Category.name) == func.lower(request.form['category_name'])).first()
+            func.lower(Category.name) == func.lower(
+                request.form['category_name'])).first()
 
         session.add(item)
 
@@ -229,11 +230,9 @@ def item_details_add():
         item.name = ''
         item.description = ''
 
-        return render_template('item_details_add.html',
-                               item=item,
+        return render_template('item_details_add.html', item=item,
                                categories=categories,
-                               username=login_session.get("username", None),
-                               )
+                               username=login_session.get("username", None), )
 
 
 @app.route('/login')
@@ -241,9 +240,7 @@ def show_login():
     state = hashlib.sha256(os.urandom(1024)).hexdigest()
     login_session['state'] = state
 
-    return render_template('login.html',
-                           STATE=state,
-                           username=None)
+    return render_template('login.html', STATE=state, username=None)
 
 
 @app.route('/gconnect', methods=['POST'])
@@ -271,8 +268,8 @@ def gconnect():
 
     # Check that the access token is valid.
     access_token = credentials.access_token
-    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
-           % access_token)
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token'
+           '=%s' % access_token)
     h = httplib2.Http()
     result = json.loads(h.request(url, 'GET')[1])
     # If there was an error in the access token info, abort.
@@ -300,8 +297,8 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_google_id = login_session.get('gplus_id')
     if stored_access_token is not None and google_id == stored_google_id:
-        response = make_response(json.dumps('Current user is already connected.'),
-                                 200)
+        response = make_response(
+            json.dumps('Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
 
         print("already connected!")
@@ -330,13 +327,15 @@ def gdisconnect():
     access_token = login_session.get('access_token')
     if access_token is None:
         print('Access Token is None')
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        response = make_response(json.dumps('Current user not connected.'),
+                                 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     print('In gdisconnect access token is %s', access_token)
     print('User name is: ')
     print(login_session['username'])
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % \
+          login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print('result is ')
@@ -358,7 +357,8 @@ def gdisconnect():
         del login_session['email']
         del login_session['picture']
 
-        response = make_response(json.dumps('Failed to revoke token for given user.'))
+        response = make_response(
+            json.dumps('Failed to revoke token for given user.'))
         response.headers['Content-Type'] = 'application/json'
 
         return response
