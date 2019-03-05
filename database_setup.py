@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 Base = declarative_base()
 
 
-class User(Base):
+class CatalogUser(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -20,7 +20,7 @@ class Category(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User)
+    user = relationship(CatalogUser)
 
     @property
     def serialize(self):
@@ -41,8 +41,8 @@ class CatalogItem(Base):
     category = relationship(
         "Category", backref=backref("catalog_items", cascade="all, delete"))
 
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User)
+    user_id = Column(Integer, ForeignKey('user.id', ))
+    user = relationship(CatalogUser)
 
     @property
     def serialize(self):
@@ -55,5 +55,6 @@ class CatalogItem(Base):
 
 
 # used check_same_thread = False to avoid threading errors
-engine = create_engine('sqlite:///item_catalog.db', connect_args={'check_same_thread': False})
+engine = create_engine('sqlite:///item_catalog.db',
+                       connect_args={'check_same_thread': False})
 Base.metadata.create_all(engine)

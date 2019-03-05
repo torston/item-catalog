@@ -15,7 +15,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import sessionmaker
 from functools import wraps
 
-from database_setup import Base, Category, CatalogItem, engine
+from database_setup import Base, Category, CatalogItem, CatalogUser, engine
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -126,8 +126,11 @@ def item_details_edit(category_name, item_name):
     if category is None:
         return jsonify('error, item not found')
 
-    if request.path.endswith('.json'):
-        return jsonify(item=item.serialize)
+    print(item.user_id)
+    print(login_session['user_id'])
+    if item.user_id != login_session['user_id']:
+        flash('You can not edit this item')
+        return redirect(url_for('home'), code=301)
 
     categories = session.query(Category).all()
 
@@ -169,6 +172,10 @@ def item_details_delete(category_name, item_name):
     if category is None:
         return jsonify('error, item not found')
 
+    if item.user_id != login_session['user_id']:
+        flash('You can not delete this item')
+        return redirect(url_for('home'), code=301)
+
     session.delete(item)
     session.commit()
 
@@ -187,6 +194,9 @@ def item_details_add_category(category_name):
         item.category = session.query(Category).filter(
             func.lower(Category.name) == func.lower(
                 request.form['category_name'])).first()
+
+        item.user = session.query(CatalogUser).filter_by(
+            id=login_session['user_id']).one()
 
         session.add(item)
 
@@ -221,6 +231,9 @@ def item_details_add():
         item.category = session.query(Category).filter(
             func.lower(Category.name) == func.lower(
                 request.form['category_name'])).first()
+
+        item.user = session.query(CatalogUser).filter_by(
+            id=login_session['user_id']).one()
 
         session.add(item)
 
@@ -323,6 +336,16 @@ def gconnect():
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+
+    user = session.query(CatalogUser).filter_by(
+        email=login_session['email']).first()
+
+    if user is None:
+        user = CatalogUser(name=data['name'], email=data['email'])
+        session.add(user)
+        session.commit()
+
+    login_session['user_id'] = user.id
 
     return redirect(url_for('home'), code=301)
 
