@@ -25,8 +25,11 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+THIS_FOLDER = os.path.dirname(os.path.abspath(__file__))
+client_secrets = os.path.join(THIS_FOLDER, 'client_secrets.json')
+
 APPLICATION_NAME = "Item Catalog Application"
-CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web'][
+CLIENT_ID = json.loads(open(client_secrets, 'r').read())['web'][
     'client_id']
 
 
@@ -324,7 +327,7 @@ def gconnect():
 
     try:
         # Upgrade the authorization code into a credentials object
-        oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
+        oauth_flow = flow_from_clientsecrets(client_secrets, scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
     except FlowExchangeError:
